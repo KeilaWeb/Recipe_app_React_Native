@@ -8,7 +8,7 @@ export default function RecipesCard({ index, navigation, item }) {
   return (
     <View>
       <Pressable 
-        style={{ width: "100%",  paddingRight: isEven ? 8 : 0, }}
+        style={{ width: "96%",  paddingRight: isEven ? 8 : 0, alignItems: "center",marginBottom: 16, }}
         className="flex justify-center mb-4 space-y-1"
         onPress={() => navigation.navigate("RecipeDetails", { ...item })}
       >
@@ -19,15 +19,17 @@ export default function RecipesCard({ index, navigation, item }) {
         />
 
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.9)"]}
+          colors={["transparent", "rgba(0,0,0,0.8)"]}
           style={{  position: "absolute", bottom: 0, width: "100%", height: hp(20), borderBottomLeftRadius: 35, borderBottomRightRadius: 35, }}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         />
 
         <Text
-          style={{ fontSize: hp(2.2), }}
-          className="font-semibold ml-2 text-white absolute bottom-7 left-2 max-w-[80%]"
+          style={{ fontSize: hp(2.2), textAlign: "center", color: "white",
+            position: "absolute",
+            bottom: 7,
+            maxWidth: "80%",}}
         >
           {item.strMeal.length > 20
             ? item.strMeal.slice(0, 20) + "..."

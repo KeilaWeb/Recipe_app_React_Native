@@ -1,219 +1,127 @@
-import { View,  Text, ScrollView, Image, Touchable, TouchableOpacity, } from "react-native";
-import React, { useEffect, useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { CachedImage } from "../../utils/index";
-import { useNavigation } from "@react-navigation/native";
-import {  heightPercentageToDP as hp, widthPercentageToDP as wp, } from "react-native-responsive-screen";
-import { ChevronLeftIcon } from "react-native-heroicons/outline";
-import { HeartIcon } from "react-native-heroicons/solid";
-import Loading from "../components/Loading";
 import axios from "axios";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, Pressable } from "react-native";
+import { HeartIcon } from "react-native-heroicons/solid";
+import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { ChevronLeftIcon } from "react-native-heroicons/outline";
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
+import { CachedImage } from "../../utils/index";
+import Loading from "../components/Loading";
 
 export default function RecipeDetailsScreen(props) {
-  let item = props.route.params;
+  const item = props.route.params;
   const navigation = useNavigation();
   const [meal, setMeal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavourite, setIsFavourite] = useState(false);
 
-  console.log("Meal", meal);
-
   useEffect(() => {
-    getMealData(item.idMeal);
-  });
-
-  const getMealData = async (id) => {
-    try {
-      const response = await axios.get(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
-      );
-
-      if (response && response.data) {
-        setMeal(response.data.meals[0]);
-        setIsLoading(false);
+    const getMealData = async (id) => {
+      try {
+        const response = await axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+        if (response && response.data) {
+          setMeal(response.data.meals[0]);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.log(error.message);
       }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+    };
+
+    getMealData(item.idMeal);
+  }, [item.idMeal]);
 
   const ingredientsIndexes = (meal) => {
     if (!meal) return [];
-    let indexes = [];
-
-    for (let i = 1; i <= 20; i++) {
-      if (meal["strIngredient" + i]) {
-        indexes.push(i);
-      }
-    }
-
-    return indexes;
+    return Array.from({ length: 20 }, (_, i) => i + 1).filter(i => meal["strIngredient" + i]);
   };
 
   return (
     <ScrollView
-      className="flex-1 bg-white"
+      style={{ flex: 1, backgroundColor: "#ffffff" }}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        paddingBottom: 30,
-      }}
+      contentContainerStyle={{ paddingBottom: 30 }}
     >
-      <StatusBar style="white" />
+      <StatusBar style="light" />
 
       {/* Recipe Image */}
-
-      <View className="flex-row justify-center">
+      <View style={{ alignItems: "center" }}>
         <CachedImage
           uri={item.strMealThumb}
           sharedTransitionTag={item.strMeal}
-          style={{
-            width: wp(100),
-            height: hp(45),
-          }}
+          style={{ width: wp(100), height: hp(45) }}
         />
       </View>
 
       {/* Back Button and Favorite Icon */}
-
-      <View className="w-full absolute flex-row justify-between items-center pt-10">
-        <View className="p-2 rounded-full bg-white ml-5">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ChevronLeftIcon
-              size={hp(3.5)}
-              color={"#f64e32"}
-              strokeWidth={4.5}
-            />
-          </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <View style={styles.iconButton}>
+          <Pressable onPress={() => navigation.goBack()}>
+            <ChevronLeftIcon size={hp(3.5)} color={"#f64e32"} strokeWidth={4.5} />
+          </Pressable>
         </View>
 
-        <View className="p-2 rounded-full bg-white mr-5">
-          <TouchableOpacity onPress={() => setIsFavourite(!isFavourite)}>
-            <HeartIcon
-              size={hp(3.5)}
-              color={isFavourite ? "#f64e32" : "gray"}
-              strokeWidth={4.5}
-            />
-          </TouchableOpacity>
+        <View style={styles.iconButton}>
+          <Pressable onPress={() => setIsFavourite(!isFavourite)}>
+            <HeartIcon size={hp(3.5)} color={isFavourite ? "#f64e32" : "gray"} strokeWidth={4.5} />
+          </Pressable>
         </View>
       </View>
 
       {/* Meal Description */}
-
       {isLoading ? (
-        <Loading size="large" className="mt-16" />
+        <Loading size="large" style={{ marginTop: 16 }} />
       ) : (
-        <View
-          className="px-4 flex justify-between space-y-4 bg-white mt-[-46]"
-          style={{
-            borderTopLeftRadius: 50,
-            borderTopRightRadius: 50,
-            paddingTop: hp(3),
-          }}
-        >
+        <View style={styles.descriptionContainer}>
           {/* Meal Name */}
           <Animated.View
-            className="space-y-2 px-4"
-            entering={FadeInDown.delay(200)
-              .duration(700)
-              .springify()
-              .damping(12)}
+            style={styles.mealNameContainer}
+            entering={FadeInDown.delay(200).duration(700).springify().damping(12)}
           >
-            <Text
-              className="font-bold flex-1 text-neutral-700"
-              style={{
-                fontSize: hp(3),
-              }}
-            >
+            <Text style={styles.mealName}>
               {meal?.strMeal}
             </Text>
-
-            <Text
-              style={{
-                fontSize: hp(2),
-              }}
-              className="text-neutral-500 font-medium"
-            >
+            <Text style={styles.mealArea}>
               {meal?.strArea}
             </Text>
           </Animated.View>
 
           {/* Ingredients */}
-
           <Animated.View
-            className="space-y-4 p-4"
-            entering={FadeInDown.delay(300)
-              .duration(700)
-              .springify()
-              .damping(12)}
+            style={styles.ingredientsContainer}
+            entering={FadeInDown.delay(300).duration(700).springify().damping(12)}
           >
-            <Text
-              style={{
-                fontSize: hp(2.5),
-              }}
-              className="font-bold flex-1 text-neutral-700"
-            >
+            <Text style={styles.sectionTitle}>
               Ingredients
             </Text>
-
-            <View className="space-y-2 ml-3">
-              {ingredientsIndexes(meal).map((i) => {
-                return (
-                  <View className="flex-row space-x-4 items-center" key={i}>
-                    <View
-                      className="bg-[#f64e32] rounded-full"
-                      style={{
-                        height: hp(1.5),
-                        width: hp(1.5),
-                      }}
-                    />
-                    <View className="flex-row space-x-2">
-                      <Text
-                        style={{
-                          fontSize: hp(1.7),
-                        }}
-                        className="font-medium text-neutral-800"
-                      >
-                        {meal["strIngredient" + i]}
-                      </Text>
-                      <Text
-                        className="font-extrabold text-neutral-700"
-                        style={{
-                          fontSize: hp(1.7),
-                        }}
-                      >
-                        {meal["strMeasure" + i]}
-                      </Text>
-                    </View>
+            <View style={styles.ingredientsList}>
+              {ingredientsIndexes(meal).map((i) => (
+                <View style={styles.ingredientItem} key={i}>
+                  <View style={styles.ingredientBullet} />
+                  <View style={styles.ingredientTextContainer}>
+                    <Text style={styles.ingredientName}>
+                      {meal["strIngredient" + i]}
+                    </Text>
+                    <Text style={styles.ingredientMeasure}>
+                      {meal["strMeasure" + i]}
+                    </Text>
                   </View>
-                );
-              })}
+                </View>
+              ))}
             </View>
           </Animated.View>
 
           {/* Instructions */}
           <Animated.View
-            className="space-y-4 p-4"
-            entering={FadeInDown.delay(400)
-              .duration(700)
-              .springify()
-              .damping(12)}
+            style={styles.instructionsContainer}
+            entering={FadeInDown.delay(400).duration(700).springify().damping(12)}
           >
-            <Text
-              className="font-bold flex-1 text-neutral-700"
-              style={{
-                fontSize: hp(2.5),
-              }}
-            >
+            <Text style={styles.sectionTitle}>
               Instructions
             </Text>
-
-            <Text
-              className="text-neutral-700"
-              style={{
-                fontSize: hp(1.7),
-              }}
-            >
+            <Text style={styles.instructionsText}>
               {meal?.strInstructions}
             </Text>
           </Animated.View>
@@ -222,3 +130,86 @@ export default function RecipeDetailsScreen(props) {
     </ScrollView>
   );
 }
+
+const styles = {
+  buttonContainer: {
+    position: "absolute",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    top: hp(10),
+    width: "100%",
+  },
+  iconButton: {
+    padding: 10,
+    borderRadius: 50,
+    backgroundColor: "white",
+    marginHorizontal: 16,
+  },
+  descriptionContainer: {
+    paddingHorizontal: 16,
+    backgroundColor: "white",
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    paddingTop: hp(3),
+  },
+  mealNameContainer: {
+    paddingVertical: 8,
+  },
+  mealName: {
+    fontSize: hp(3),
+    fontWeight: "bold",
+    color: "#4A4A4A",
+  },
+  mealArea: {
+    fontSize: hp(2),
+    color: "#A0A0A0",
+  },
+  ingredientsContainer: {
+    paddingVertical: 16,
+  },
+  sectionTitle: {
+    fontSize: hp(2.5),
+    fontWeight: "bold",
+    color: "#4A4A4A",
+  },
+  ingredientsList: {
+    marginLeft: 16,
+    marginTop: 8,
+  },
+  ingredientItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  ingredientBullet: {
+    backgroundColor: "#f64e32",
+    borderRadius: 50,
+    height: hp(1.5),
+    width: hp(1.5),
+    marginRight: 10,
+  },
+  ingredientTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ingredientName: {
+    fontSize: hp(1.7),
+    fontWeight: "medium",
+    color: "#4A4A4A",
+  },
+  ingredientMeasure: {
+    fontSize: hp(1.7),
+    fontWeight: "bold",
+    color: "#4A4A4A",
+    marginLeft: 4,
+  },
+  instructionsContainer: {
+    paddingVertical: 16,
+  },
+  instructionsText: {
+    fontSize: hp(1.7),
+    color: "#4A4A4A",
+    lineHeight: hp(2.5),
+  },
+};

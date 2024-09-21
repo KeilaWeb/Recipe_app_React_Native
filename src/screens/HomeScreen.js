@@ -1,112 +1,135 @@
-import React from "react";
-import { View, Text, Image, TextInput, ScrollView, StyleSheet, } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
-import {  BellIcon, MagnifyingGlassIcon, AdjustmentsHorizontalIcon, } from "react-native-heroicons/outline"; 
+import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from "react-native-heroicons/outline";
+import { View, Text, ScrollView, SafeAreaView, Image, TextInput, StyleSheet } from "react-native";
+import { getCategories, getRecipes } from "../Helpers/api"; 
+import Categories from "../components/Categories";
+import Recipes from "../components/Recipes";
 
 export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <StatusBar style="dark" />
+    const [activeCategory, setActiveCategory] = useState("Beef");
+    const [categories, setCategories] = useState([]);
+    const [meals, setMeals] = useState([]);
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollViewContent}
-      >
-        <View style={styles.headerContainer}>
-          <Image
-            source={require("../../assets/bolo.png")}
-            style={styles.image}
-          />
-          <BellIcon size={hp(4)} color="gray" />
-        </View>
+    useEffect(() => {
+        const fetchData = async () => {
+            const categoriesData = await getCategories();
+            setCategories(categoriesData);
+    
+            if (categoriesData.length > 0) {
+                const initialCategory = categoriesData[0].strCategory || "Beef";
+                setActiveCategory(initialCategory);
+    
+                const recipesData = await getRecipes(initialCategory);
+                setMeals(recipesData);  
+            } else {
+                setMeals([]); 
+            }
+        };
+    
+        fetchData();
+    }, []);
 
-        <View style={styles.greetingContainer}>
-          <Text style={styles.greetingText}>Hello, Keila</Text>
-          <View>
-            <Text style={styles.subGreetingText}>Make your own food,</Text>
-          </View>
-          <Text style={styles.stayAtHomeText}>
-            stay at <Text style={styles.homeText}>Home</Text>
-          </Text>
-        </View>
+    const handleChangeCategory = async (category) => {
+        setActiveCategory(category);
+        const recipesData = await getRecipes(category);
+        setMeals(recipesData || []);
+    };
 
-        <View style={styles.searchContainer}>
-          <TextInput
-            placeholder="Busque por uma receita"
-            placeholderTextColor="gray"
-            style={styles.searchInput}
-          />
-          <View style={styles.searchIconContainer}>
-            <MagnifyingGlassIcon size={hp(2.5)} strokeWidth={3} color="gray" />
-          </View>
-        </View>
-
-        <View>{/* Adicione o conteúdo adicional aqui */}</View>
-      </ScrollView>
-    </View>
-  );
+    return (
+        <SafeAreaView style={styles.container}>
+            <StatusBar style="dark" />
+            <ScrollView 
+                showsVerticalScrollIndicator={false} 
+                contentContainerStyle={styles.scrollContainer}
+            >
+                <View style={styles.header}>
+                    <AdjustmentsHorizontalIcon size={hp(4)} color={"gray"} />
+                    <Image source={require("../../assets/images/avatar.png")} style={styles.avatar} />
+                </View>
+                <View style={styles.headlines}>
+                    <Text style={styles.title}>Fast & Delicious</Text>
+                    <Text style={styles.subtitle}>Food You <Text style={styles.loveText}>Love</Text></Text>
+                </View>
+                <View style={styles.searchContainer}>
+                    <View style={styles.iconContainer}>
+                        <MagnifyingGlassIcon size={hp(2.5)} color={"gray"} strokeWidth={3} />
+                    </View>
+                    <TextInput
+                        placeholder="Search Your Favorite Food"
+                        placeholderTextColor={"gray"}
+                        style={styles.searchInput}
+                    />
+                </View>
+                {categories.length > 0 && (
+                    <Categories 
+                        categories={categories} 
+                        activeCategory={activeCategory} 
+                        handleChangeCategory={handleChangeCategory} 
+                    />
+                )}
+                <Recipes meals={meals} />
+            </ScrollView>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  scrollViewContent: {
-    paddingBottom: 50,
-    paddingTop: 14,
-  },
-  headerContainer: {
-    marginHorizontal: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  image: {
-    width: hp(5.5),
-    height: hp(5),
-    borderRadius: 100,
-  },
-  greetingContainer: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-  },
-  greetingText: {
-    fontSize: hp(1.7),
-    color: "#6B7280",
-  },
-  subGreetingText: {
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  stayAtHomeText: {
-    fontSize: hp(3.8),
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  homeText: {
-    color: "#F59E0B",
-  },
-  searchContainer: {
-    marginHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderRadius: 50,
-    padding: 6,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: hp(1.7),
-    marginBottom: 1,
-    paddingLeft: 12,
-    trackingWider: "wider",
-  },
-  searchIconContainer: {
-    backgroundColor: "white",
-    borderRadius: 50,
-    padding: 3,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: "white",
+    },
+    scrollContainer: {
+        paddingBottom: 50,
+        paddingTop: 14,
+    },
+    header: {
+        marginHorizontal: 16,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    avatar: {
+        width: hp(5),
+        height: hp(5),
+        borderRadius: hp(5.5),
+    },
+    headlines: {
+        marginHorizontal: 16,
+        marginBottom: 16,
+    },
+    title: {
+        fontSize: hp(3.5),
+        fontWeight: "bold",
+        color: "#4A4A4A",
+    },
+    subtitle: {
+        fontSize: hp(3.5),
+        fontWeight: "900",
+        color: "#4A4A4A",
+    },
+    loveText: {
+        color: "#f64e32",
+    },
+    searchContainer: {
+        marginHorizontal: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        borderColor: "brown",
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: 8,
+    },
+    iconContainer: {
+        backgroundColor: "white",
+        borderRadius: 50,
+        padding: 4,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: hp(1.7),
+        paddingLeft: 8,
+        color: "black",
+    },
 });

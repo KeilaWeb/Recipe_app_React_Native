@@ -1,32 +1,25 @@
-import { View, Text } from "react-native";
 import React from "react";
-import RecipesCard from "./RecipesCard";
+import { Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import MasonryList from "@react-native-seoul/masonry-list";
-import Loading from "./Loading";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 
-export default function Recipes({ meals, categories }) {
+import Loading from "./Loading";
+import RecipesCard from "./RecipesCard";
+
+export default function Recipes({ meals = [], categories = [] }) {
   const navigation = useNavigation();
 
   return (
-    <Animated.View
-      className="mx-4 space-y-4"
-      entering={FadeInDown.delay(200).duration(700).springify().damping(12)}
-    >
-      <Text
-        style={{ fontSize: hp(2) }}
-        className="font-semibold text-neutral-600"
-      >
-        {meals.length} Recipes
+    <Animated.View style={styles.container} entering={FadeInDown.delay(200).duration(700).springify().damping(12)}>
+      <Text style={[styles.recipeCountText, { fontSize: hp(2) }]}>
+        {meals.length > 0 ? `${meals.length} Recipes` : "No Recipes Found"}
       </Text>
 
-      <Animated.View
-        entering={FadeInDown.delay(200).duration(700).springify().damping(12)}
-      >
-        {categories.length == 0 || meals.length == 0 ? (
-          <Loading size="large" className="mt-20" />
+      <Animated.View entering={FadeInDown.delay(200).duration(700).springify().damping(12)}>
+        {meals.length === 0 ? (
+          <Loading size="large" style={styles.loading} />
         ) : (
           <MasonryList
             data={meals}
@@ -43,3 +36,18 @@ export default function Recipes({ meals, categories }) {
     </Animated.View>
   );
 }
+
+
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 16,
+    spaceVertical: 16,
+  },
+  recipeCountText: {
+    fontWeight: "600",
+    color: "#4B5563", // Neutral-600 color
+  },
+  loading: {
+    marginTop: hp(20),
+  },
+});
