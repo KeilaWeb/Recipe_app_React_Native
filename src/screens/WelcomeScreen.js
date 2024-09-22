@@ -49,10 +49,10 @@ export default function WelcomeScreen() {
       {/* Texto Centralizado */}
       <View style={{ alignItems: "center", marginTop: 20 }}>
         <Text style={{ fontSize: hp(7), fontWeight: "bold", color: "white", letterSpacing: 2, }} >
-          Foody
+          Tudo Gostoso
         </Text>
         <Text style={{ fontSize: hp(2), fontWeight: "500", color: "white",  letterSpacing: 2, }} >
-          Food is always right
+          A comida certa no momento certo
         </Text>
       </View>
     </View>

@@ -49,15 +49,14 @@ export default function HomeScreen() {
                     <Image source={require("../../assets/images/avatar.png")} style={styles.avatar} />
                 </View>
                 <View style={styles.headlines}>
-                    <Text style={styles.title}>Fast & Delicious</Text>
-                    <Text style={styles.subtitle}>Food You <Text style={styles.loveText}>Love</Text></Text>
+                    <Text style={styles.subtitle}>Tudo <Text style={styles.loveText}>Gostoso</Text></Text>
                 </View>
                 <View style={styles.searchContainer}>
                     <View style={styles.iconContainer}>
                         <MagnifyingGlassIcon size={hp(2.5)} color={"gray"} strokeWidth={3} />
                     </View>
                     <TextInput
-                        placeholder="Search Your Favorite Food"
+                        placeholder="Procure uma receita"
                         placeholderTextColor={"gray"}
                         style={styles.searchInput}
                     />
@@ -116,7 +115,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         flexDirection: "row",
         alignItems: "center",
-        borderColor: "brown",
+        borderColor: "#facf7d",
         borderWidth: 1,
         borderRadius: 12,
         padding: 8,

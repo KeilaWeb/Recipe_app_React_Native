@@ -13,9 +13,6 @@ export default function Recipes({ meals = [], categories = [] }) {
 
   return (
     <Animated.View style={styles.container} entering={FadeInDown.delay(200).duration(700).springify().damping(12)}>
-      <Text style={[styles.recipeCountText, { fontSize: hp(2) }]}>
-        {meals.length > 0 ? `${meals.length} Recipes` : "No Recipes Found"}
-      </Text>
 
       <Animated.View entering={FadeInDown.delay(200).duration(700).springify().damping(12)}>
         {meals.length === 0 ? (
